@@ -1,0 +1,46 @@
+package com.tarunfollowers.app;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.content.Intent;
+import android.net.Uri;
+import android.webkit.WebView;
+import android.webkit.WebSettings;
+import android.webkit.WebViewClient;
+import android.webkit.WebResourceRequest;
+import android.widget.Toast;
+
+public class MainActivity extends Activity {
+    @Override public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        WebView web = new WebView(this);
+        WebSettings settings = web.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        web.setBackgroundColor(0xFF0B1020);
+        web.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return handleUrl(request.getUrl().toString());
+            }
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return handleUrl(url);
+            }
+            private boolean handleUrl(String url) {
+                if (url != null && url.startsWith("upi://")) {
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(Intent.createChooser(intent, "Pay with UPI"));
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "No UPI app found on this phone.", Toast.LENGTH_LONG).show();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+        setContentView(web);
+        web.loadUrl("file:///android_asset/index.html");
+    }
+}
